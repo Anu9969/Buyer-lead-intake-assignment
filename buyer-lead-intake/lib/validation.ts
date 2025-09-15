@@ -60,9 +60,12 @@ export const UpdateBuyerSchema = BuyerSchema.partial();
 // Schema for CSV import validation
 export const CSVBuyerSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters').max(80, 'Name must be at most 80 characters'),
-  email: z.string().optional().refine(val => !val || val === '' || z.string().email().safeParse(val).success, {
-    message: 'Invalid email format'
-  }).transform(val => val === '' ? undefined : val),
+  email: z.string().optional().transform(val => {
+    if (val === '' || !val) return undefined;
+    // Basic email validation
+    if (val && !val.includes('@')) return undefined;
+    return val;
+  }),
   phone: z.string().min(10, 'Phone must be at least 10 digits').max(15, 'Phone must be at most 15 digits'),
   city: CitySchema,
   propertyType: PropertyTypeSchema,

@@ -43,8 +43,17 @@ export async function POST(request: NextRequest) {
     
     await new Promise((resolve, reject) => {
       stream
-        .pipe(csv({ headers: true }))
-        .on('data', (row) => rows.push(row))
+        .pipe(csv({ 
+          headers: true,
+          skipEmptyLines: true,
+          skipLinesWithError: true
+        }))
+        .on('data', (row) => {
+          // Only add rows that have actual data (not just headers)
+          if (row.fullName && row.fullName !== 'fullName') {
+            rows.push(row);
+          }
+        })
         .on('end', resolve)
         .on('error', reject);
     });
@@ -62,6 +71,14 @@ export async function POST(request: NextRequest) {
     const validRows = validationResults.filter(result => result.success);
     const invalidRows = validationResults.filter(result => !result.success);
 
+    // Debug: Log first few rows and validation results
+    console.log('Total rows parsed:', rows.length);
+    console.log('First row:', rows[0]);
+    console.log('First validation result:', validationResults[0]);
+    if (validationResults[0] && !validationResults[0].success) {
+      console.log('Validation error details:', validationResults[0].error);
+    }
+
     // If there are validation errors, return them
     if (invalidRows.length > 0) {
       return NextResponse.json({
@@ -69,6 +86,10 @@ export async function POST(request: NextRequest) {
         errors: invalidRows.map(result => result.error),
         validCount: validRows.length,
         invalidCount: invalidRows.length,
+        debug: {
+          firstRow: rows[0],
+          firstValidation: validationResults[0]
+        }
       }, { status: 400 });
     }
 
