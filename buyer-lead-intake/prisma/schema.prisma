@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  buyers Buyer[]
+
+  @@map("users")
+}
+
+model Buyer {
+  id           String      @id @default(cuid())
+  fullName     String
+  email        String?
+  phone        String
+  city         City
+  propertyType PropertyType
+  bhk          Bhk?
+  purpose      Purpose
+  budgetMin    Int?
+  budgetMax    Int?
+  timeline     Timeline
+  source       Source
+  status       Status      @default(NEW)
+  notes        String?
+  tags         String      // Store as comma-separated string for SQLite
+  ownerId      String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  owner   User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  history BuyerHistory[]
+
+  @@map("buyers")
+}
+
+model BuyerHistory {
+  id        String   @id @default(cuid())
+  buyerId   String
+  changedBy String
+  changedAt DateTime @default(now())
+  diff      Json
+
+  // Relations
+  buyer Buyer @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@map("buyer_history")
+}
+
+enum City {
+  CHANDIGARH
+  MOHALI
+  ZIRAKPUR
+  PANCHKULA
+  OTHER
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  PLOT
+  OFFICE
+  RETAIL
+}
+
+enum Bhk {
+  STUDIO
+  ONE
+  TWO
+  THREE
+  FOUR
+}
+
+enum Purpose {
+  BUY
+  RENT
+}
+
+enum Timeline {
+  ZERO_TO_THREE_MONTHS
+  THREE_TO_SIX_MONTHS
+  MORE_THAN_SIX_MONTHS
+  EXPLORING
+}
+
+enum Source {
+  WEBSITE
+  REFERRAL
+  WALK_IN
+  CALL
+  OTHER
+}
+
+enum Status {
+  NEW
+  QUALIFIED
+  CONTACTED
+  VISITED
+  NEGOTIATION
+  CONVERTED
+  DROPPED
+}
