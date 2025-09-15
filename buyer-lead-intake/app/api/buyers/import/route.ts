@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { validateCSVRow } from '@/lib/validation';
-import { parse } from 'csv-parser';
+import csv from 'csv-parser';
 import { Readable } from 'stream';
 
 export async function POST(request: NextRequest) {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     
     await new Promise((resolve, reject) => {
       stream
-        .pipe(parse({ headers: true }))
+        .pipe(csv({ headers: true }))
         .on('data', (row) => rows.push(row))
         .on('end', resolve)
         .on('error', reject);

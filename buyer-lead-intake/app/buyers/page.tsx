@@ -79,7 +79,9 @@ export default function BuyersPage() {
         ...(filters.timeline && { timeline: filters.timeline }),
       })
 
-      const response = await fetch(`/api/buyers?${params}`)
+      const response = await fetch(`/api/buyers?${params}`, {
+        credentials: 'include'
+      })
       if (response.ok) {
         const data = await response.json()
         setBuyers(data.buyers)
@@ -134,7 +136,9 @@ export default function BuyersPage() {
         ...(filters.timeline && { timeline: filters.timeline }),
       })
 
-      const response = await fetch(`/api/buyers/export?${params}`)
+      const response = await fetch(`/api/buyers/export?${params}`, {
+        credentials: 'include'
+      })
       if (response.ok) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)

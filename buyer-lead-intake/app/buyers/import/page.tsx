@@ -43,6 +43,7 @@ export default function ImportPage() {
       const response = await fetch('/api/buyers/import', {
         method: 'POST',
         body: formData,
+        credentials: 'include'
       })
 
       const data = await response.json()
